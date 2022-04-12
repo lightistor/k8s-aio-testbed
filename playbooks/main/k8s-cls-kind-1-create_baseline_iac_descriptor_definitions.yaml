@@ -1,0 +1,31 @@
+- hosts: all
+  vars:
+    var_user: "{{ user }}"
+    var_vmetallb: "{{ vmetallb }}"
+  become: true
+  tasks:
+  - name: KinD Cluster Descriptor Creation
+    when: inventory_hostname in groups['kind-pg-0']
+    include_tasks: /home/{{var_user}}/k8s-aio-testbed/playbooks/k8s-cls-kind/create-iac-descriptors/k8s-cls-kind-kind_cluster_config.yaml
+    vars:
+      s_var_user: "{{ var_user }}"
+
+  - name: MetalLB Descriptors Creation
+    when: inventory_hostname in groups['kind-pg-0']
+    include_tasks: /home/{{var_user}}/k8s-aio-testbed/playbooks/k8s-cls-kind/create-iac-descriptors/k8s-cls-kind-metallb.yaml
+    vars:
+      s_var_user: "{{ var_user }}"
+      s_var_vmetallb: "{{ var_vmetallb }}"
+
+  - name: KinD Node Metric Exporter Descriptor Creation
+    when: inventory_hostname in groups['kind-pg-0']
+    include_tasks: /home/{{var_user}}/k8s-aio-testbed/playbooks/k8s-cls-kind/create-iac-descriptors/k8s-cls-kind-kind_node_metric_exporter.yaml
+    vars:
+      s_var_user: "{{ var_user }}"
+
+  - name: MetalLB Basic Access Integration Descriptors Creation
+    when: inventory_hostname in groups['kind-pg-0']
+    include_tasks: /home/{{var_user}}/k8s-aio-testbed/playbooks/k8s-cls-kind/create-iac-descriptors/k8s-cls-kind-metallb_basic_access_integration.yaml
+    vars:
+      s_var_user: "{{ var_user }}"
+

@@ -1,0 +1,3 @@
+---
+- name: Setup KinD Cluster "{{s_var_nm_kind_cls}}"
+  command: kind create cluster --name {{s_var_nm_kind_cls}} --config /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/config/kind-config.yaml
