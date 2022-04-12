@@ -1,0 +1,56 @@
+---
+- name: MetalLB Basic Access Integration - Deployment Descriptor
+  copy:
+    remote_src: true
+    dest: /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/platform-test-app/metallb-dryrun-nginx-app-deploy.yaml
+    content: |
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nginx
+        namespace: mtllb-int-test
+      spec:
+        selector:
+          matchLabels:
+            app: l-mtllb-int-nginx
+        template:
+          metadata:
+            labels:
+              app: l-mtllb-int-nginx
+          spec:
+            containers:
+            - name: c-mtllb-int-nginx
+              image: nginx:1
+              ports:
+              - name: http
+                containerPort: 80
+    mode: 0755
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+  when: inventory_hostname in groups['kind-pg-0']
+
+- name: MetalLB Basic Access Integration - Service Descriptor
+  copy:
+    remote_src: true
+    dest: /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/platform-test-app/metallb-dryrun-nginx-app-svc.yaml
+    content: |
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: mtllb-int-nginx
+        namespace: mtllb-int-test
+        annotations:
+          metallb.universe.tf/address-pool: docker-nix-server
+      spec:
+        ports:
+        - name: http
+          port: 48080
+          protocol: TCP
+          targetPort: 80
+        selector:
+          app: l-mtllb-int-nginx
+        type: LoadBalancer
+    mode: 0755
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+  when: inventory_hostname in groups['kind-pg-0']

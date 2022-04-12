@@ -1,0 +1,59 @@
+---
+- name: Get HELM CLI binary
+  get_url:
+    url: https://get.helm.sh/helm-{{s_var_helmcli}}-linux-amd64.tar.gz
+    dest: /home/{{s_var_user}}/helm-{{s_var_helmcli}}-linux-amd64.tar.gz
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0755
+
+- name: Decompress archive
+  become: yes
+  become_user: "{{ s_var_user }}"
+  unarchive:
+    remote_src: true
+    src: "{{ item }}"
+    dest: /home/{{s_var_user}}/util/helm/{{s_var_helmcli}}
+    mode: 0755
+  with_items:
+    - /home/{{s_var_user}}/helm-{{s_var_helmcli}}-linux-amd64.tar.gz
+
+- name: Checking if the binary file exists
+  stat: 
+    path: /home/{{s_var_user}}/util/helm/{{s_var_helmcli}}/linux-amd64/helm
+  register: helm_cli_origin_file_data
+
+- name: Move content of decompressed archive to directory
+  copy:
+    remote_src: true
+    src: /home/{{s_var_user}}/util/helm/{{s_var_helmcli}}/linux-amd64/helm
+    dest: /home/{{s_var_user}}/util/helm/{{s_var_helmcli}}/bin/helm
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0755
+  when: helm_cli_origin_file_data.stat.exists
+
+- name: Update binary permissions for pre-adjustment
+  file:
+    path: /home/{{s_var_user}}/util/helm/{{s_var_helmcli}}/bin/helm
+    mode: a-x
+
+- name: Update binary permissions for alignment
+  file:
+    path: /home/{{s_var_user}}/util/helm/{{s_var_helmcli}}/bin/helm
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0755
+
+- name: Remove retrieved archive
+  command: rm /home/{{s_var_user}}/helm-{{s_var_helmcli}}-linux-amd64.tar.gz
+
+- name: Remove decompression target folder
+  command: rm -rf /home/{{s_var_user}}/util/helm/{{s_var_helmcli}}/linux-amd64
+
+- name: Add binary to PATH and .bash profile
+  command: |
+    sh -c 'cat << EOF >> /home/{{s_var_user}}/.bashrc
+    HELM_HOME=/home/{{s_var_user}}/util/helm/{{s_var_helmcli}}
+    PATH=\$HELM_HOME/bin:\$PATH
+    EOF'

@@ -1,0 +1,130 @@
+---
+- hosts: all
+  vars:
+    var_user: "{{ user }}"
+    var_kubectl: "{{ vkubectl }}"
+    var_kindcli: "{{ vkindcli }}"
+    var_kind_img_tag: "{{ kind_img_tag }}"
+    var_helmcli: "{{ vhelmcli }}"
+  become: true
+  tasks:
+  - name: Install primary dependencies for Cluster VM
+    when: inventory_hostname in groups['kind-pg-0']
+    yum:
+      name: "{{ item }}"
+      state: present
+    with_items:
+    - yum-utils
+    - device-mapper-persistent-data
+    - lvm2
+
+  - name: Install tool dependencies
+    when: inventory_hostname in groups['kind-pg-0']
+    yum:
+      name: "{{ item }}"
+      state: present
+    with_items:
+    - wget
+    - git
+    - net-tools
+
+  - name: Add Docker repository
+    when: inventory_hostname in groups['kind-pg-0']
+    command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+  - name: Install Docker
+    when: inventory_hostname in groups['kind-pg-0']
+    yum: 
+      name: ['docker-ce', 'docker-ce-cli', 'containerd.io']
+      state: present
+
+  - name: Add "{{ var_user }}" user to docker group
+    when: inventory_hostname in groups['kind-pg-0']
+    become: yes
+    user:
+      name: "{{ var_user }}"
+      groups: docker
+      append: yes
+
+  - name: Create Docker daemon.json
+    become: yes
+    copy:
+      remote_src: true
+      dest: /etc/docker/daemon.json
+      content: |
+        {
+            "exec-opts": ["native.cgroupdriver=systemd"],
+            "log-driver": "json-file",
+            "log-opts": {
+              "max-file": "20",
+              "max-size": "10m"
+            },
+            "storage-driver": "overlay2",
+            "storage-opts": [
+              "overlay2.override_kernel_check=true"
+            ]
+        }
+      mode: 0644
+    when: inventory_hostname in groups['kind-pg-0']
+
+  - name: Start & enable Docker service
+    when: inventory_hostname in groups['kind-pg-0']
+    ansible.builtin.service:
+      name: docker
+      state: started
+      enabled: yes
+
+  - name: Disable SELinux
+    when: inventory_hostname in groups['kind-pg-0']
+    command: setenforce 0
+
+  - name: Get Tools from Package Manager for extractors
+    ansible.builtin.yum:
+      name:
+        - unzip
+        - tar
+      state: present
+    become: true
+
+  - name: Rotate BASH Profile
+    when: inventory_hostname in groups['kind-pg-0']
+    include_tasks: /home/{{var_user}}/k8s-aio-testbed/playbooks/k8s-cls-kind/common/k8s-cls-kind-rotate_bashrc.yaml
+    vars:
+      s_var_user: "{{ var_user }}"
+
+  - name: Setup Descriptor Directories
+    when: inventory_hostname in groups['kind-pg-0']
+    include_tasks: /home/{{var_user}}/playbooks/k8s-cls-kind/common/k8s-cls-kind-setup_directories.yaml
+    vars:
+      s_var_user: "{{ var_user }}"
+      s_var_kubectl: "{{ var_kubectl }}"
+      s_var_kindcli: "{{ var_kindcli }}"
+      s_var_helmcli: "{{ vhelmcli }}"
+
+  - name: kubectl CLI Tool Installation
+    when: inventory_hostname in groups['kind-pg-0']
+    include_tasks: /home/{{var_user}}/k8s-aio-testbed/playbooks/k8s-cls-kind/create-subtasks/k8s-cls-kind-install_kubectl_cli.yaml
+    vars:
+      s_var_user: "{{ var_user }}"
+      s_var_kubectl: "{{ var_kubectl }}"
+
+  - name: KinD CLI Tool Installation
+    when: inventory_hostname in groups['kind-pg-0']
+    include_tasks: /home/{{var_user}}/k8s-aio-testbed/playbooks/k8s-cls-kind/create-subtasks/k8s-cls-kind-install_kind_cli.yaml
+    vars:
+      s_var_user: "{{ var_user }}"
+      s_var_kindcli: "{{ var_kindcli }}"
+
+  - name: Helm CLI Tool Installation
+    when: inventory_hostname in groups['kind-pg-0']
+    include_tasks: /home/{{var_user}}/k8s-aio-testbed/playbooks/k8s-cls-kind/create-subtasks/k8s-cls-kind-install_helm_cli.yaml
+    vars:
+      s_var_user: "{{ var_user }}"
+      s_var_helmcli: "{{ var_helmcli }}"
+
+#  - name: Maven CLI Tool Installation
+#    when: inventory_hostname in groups['kind-pg-0']
+#    include_tasks: /home/{{var_user}}/k8s-aio-testbed/playbooks/k8s-cls-kind/create-subtasks/k8s-cls-kind-install_maven.yaml
+#    vars:
+#      s_var_user: "{{ var_user }}"
+#      s_var_maven: "{{ var_maven }}"

@@ -1,0 +1,70 @@
+---
+- name: Setup kubectl CLI binary directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0775
+  loop:
+    - /home/{{s_var_user}}/util/kubectl/{{s_var_kubectl}}/bin
+
+- name: Setup KinD CLI binary directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0775
+  loop:
+    - /home/{{var_user}}/util/kind/{{s_var_kindcli}}/bin
+
+- name: Setup Helm CLI binary directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0775
+  loop:
+    - /home/{{s_var_user}}/util/helm/{{s_var_helmcli}}/bin
+
+- name: Setup KinD Cluster Descriptor Configuration directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0775
+  loop:
+    - /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/config
+
+- name: Setup KinD Platform Test Application Descriptor directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0775
+  loop:
+    - /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/platform-test-app
+
+- name: Setup Helm Chart Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0775
+  loop:
+    - /home/{{var_user}}/app/helm-local
+
+- name: Setup Pulsar Runtime Client directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0775
+  loop:
+    - /home/{{var_user}}/stage/pulsar-runtime

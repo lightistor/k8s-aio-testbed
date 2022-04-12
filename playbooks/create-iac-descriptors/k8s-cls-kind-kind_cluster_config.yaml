@@ -1,0 +1,22 @@
+---
+- name:  KinD Cluster Descriptor
+  copy:
+    remote_src: true
+    dest: /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/config/kind-config.yaml
+    content: |
+      # four node (three workers) cluster config
+      kind: Cluster
+      apiVersion: kind.x-k8s.io/v1alpha4
+      nodes:
+      - role: control-plane
+        extraPortMappings:
+        - containerPort: 38180
+          hostPort: 8080
+          protocol: TCP
+      - role: worker
+      - role: worker
+      - role: worker
+    mode: 0755
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+  when: inventory_hostname in groups['kind-pg-0']

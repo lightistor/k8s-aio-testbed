@@ -1,0 +1,32 @@
+---
+- name: Checking if the back-up bash profile exists
+  stat: 
+    path: /home/{{s_var_user}}/.bashrc.BAK
+  register: bashrc_backup_origin_file_data
+
+- name: Remove old back-up bash profile if it exists
+  command: rm /home/{{s_var_user}}/.bashrc
+  when: bashrc_backup_origin_file_data.stat.exists
+
+- name: Restore current bash profile from back-up bash profile
+  copy:
+    remote_src: true
+    src: /home/{{s_var_user}}/.bashrc.BAK
+    dest: /home/{{s_var_user}}/.bashrc
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0644
+  when: bashrc_backup_origin_file_data.stat.exists
+
+- name: Remove old back-up bash profile if it exists
+  command: rm /home/{{s_var_user}}/.bashrc.BAK
+  when: bashrc_backup_origin_file_data.stat.exists
+
+- name: Back-up bash profile
+  copy:
+    remote_src: true
+    src: /home/{{s_var_user}}/.bashrc
+    dest: /home/{{s_var_user}}/.bashrc.BAK
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0644

@@ -1,0 +1,35 @@
+---
+- name: Create MetalLB namespace in KinD Cluster "{{s_var_nm_kind_cls}}"
+  shell: kubectl create ns metallb-system --context {{s_var_nm_kind_cls}}
+
+- name: Create MetalLB in KinD Cluster "{{s_var_nm_kind_cls}}"
+  shell: kubectl apply --context {{s_var_nm_kind_cls}} -f /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/config/metallb.yaml
+
+- name: Wait for MetalLB speaker pods become ready
+  shell: "kubectl wait --context {{s_var_nm_kind_cls}} --namespace=metallb-system --for=condition=Ready pods --selector app=metallb --timeout=300s"
+  register: metallb_pods_ready
+
+- name: Retrieve KinD Docker Bridge Address for the /24 block as a prefix
+  shell: NET_DOCKER_CLASSC=$(docker network inspect kind -f "{{(index .IPAM.Config 0).Subnet}}" | cut -d '.' -f1,2)".255"; echo $NET_DOCKER_CLASSC
+  register: NET_DOCKER_CLASSC
+
+- debug: 
+    var: "{{ NET_DOCKER_CLASSC.stdout }}"
+
+- name: Create MetalLB ConfigMap
+  shell: sed -e "s/#NET_DOCKER_CLASSC#/{{ NET_DOCKER_CLASSC.stdout }}/g" /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/config/kind-metallb-configmap-base.yaml > /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/config/kind-metallb-configmap.yaml
+
+- name: Update MetalLB ConfigMap permissions for pre-adjustment
+  file:
+    path: /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/config/kind-metallb-configmap.yaml
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: a-x
+
+- name: Update MetalLB ConfigMap permissions for alignment
+  file:
+    path: /home/{{s_var_user}}/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/config/kind-metallb-configmap.yaml
+    owner: "{{ s_var_user }}"
+    group: "{{ s_var_user }}"
+    mode: 0655
+
