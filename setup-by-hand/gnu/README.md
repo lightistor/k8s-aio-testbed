@@ -355,6 +355,25 @@ EOF'
 sh /home/admin/stage/pulsar-runtime/prep-pulsar-chart.sh
 
 helm repo add apache https://pulsar.apache.org/charts && helm repo update
+
+# [TODO] Retrieve tags from retrieved chart values.yaml for docker container images
+docker pull apachepulsar/pulsar-all:2.9.2
+docker pull streamnative/apache-pulsar-grafana-dashboard-k8s:0.0.16
+docker pull prom/prometheus:v2.17.2
+docker pull apachepulsar/pulsar-manager:v0.2.0
+# * Load from local tarball instead of local docker for ansible remote hosts
+# kind load --name kind-pg-0 image-archive $KIND_CNT_IMG_DIR/apachepulsar-pulsar_-_all-2.9.2.tar.gz
+kind load --name kind-pg-0 docker-image apachepulsar/pulsar-all:2.9.2
+kind load --name kind-pg-0 docker-image streamnative/apache-pulsar-grafana-dashboard-k8s:0.0.16
+kind load --name kind-pg-0 docker-image prom/prometheus:v2.17.2
+kind load --name kind-pg-0 docker-image apachepulsar/pulsar-manager:v0.2.0
+
+# [TODO] Valida Image update to KinD nodes through the output
+docker exec -it kind-pg-0-control-plane bash -c 'crictl images'
+# docker exec -it kind-pg-0-worker bash -c 'crictl images'
+# docker exec -it kind-pg-0-worker-2 bash -c 'crictl images'
+# docker exec -it kind-pg-0-worker-3 bash -c 'crictl images'
+
 kubectl create ns pulsar --context kind-kind-pg-0
 helm install pulsar-mini \
     /home/admin/app/helm-local/pulsar-helm-chart/charts/pulsar \

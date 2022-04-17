@@ -36,7 +36,7 @@
 
     - Incorporate image caching into KinD cluster descriptor (See Verrazzano setup with KinD)
     - Incorporate private container image registry for infrastructure and platform setups
-    - Automate pushing container images to be used within the orchestrated deployments to the KinD nodes
+    - [WIP] Automate pushing container images to be used within the orchestrated deployments to the KinD nodes
 
 - Enhancements:
     
