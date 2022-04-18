@@ -75,8 +75,37 @@ EOF'
 source /home/admin/.bashrc
 ```
 
+### **JDK Installlation for Java 11**
+```bash
+# Java 1.8
+# sudo dnf install java-1.8.0-openjdk
+# sudo dnf install java-11-openjdk
+mkdir -p /home/admin/util/openjdk/11/1.11.28
+curl -Lo /home/admin/openjdk-11+28_linux-x64_bin.tar.gz https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_linux-x64_bin.tar.gz
+
+tar -xf /home/admin/openjdk-11+28_linux-x64_bin.tar.gz -C /home/admin/util/openjdk/11/1.11.28
+mv /home/admin/util/openjdk/11/1.11.28/jdk-11/* /home/admin/util/openjdk/11/1.11.28/
+rm -rf /home/admin/util/openjdk/11/1.11.28/jdk-11
+sh -c 'cat << EOF >> /home/admin/.bashrc
+JAVA_HOME=/home/admin/util/openjdk/11/1.11.28
+PATH=\$JAVA_HOME/bin:\$PATH
+EOF'
+source /home/admin/.bashrc
+```
+
 ### **Maven Installation**
 ```bash
+mkdir -p /home/admin/util/maven/3.8.5
+curl -Lo /home/admin/apache-maven-3.8.5-bin.tar.gz https://dlcdn.apache.org/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.tar.gz
+
+tar -xf /home/admin/apache-maven-3.8.5-bin.tar.gz -C /home/admin/util/maven/3.8.5
+mv /home/admin/util/maven/3.8.5/apache-maven-3.8.5/* /home/admin/util/maven/3.8.5/
+rm -rf /home/admin/util/maven/3.8.5/apache-maven-3.8.5
+sh -c 'cat << EOF >> /home/admin/.bashrc
+MVN_HOME=/home/admin/util/maven/3.8.5
+PATH=\$MVN_HOME/bin:\$PATH
+EOF'
+source /home/admin/.bashrc
 ```
 
 ### **Baseline IaC Descriptor Definitions**
@@ -300,7 +329,7 @@ curl $KIND_VM_IP:$TEST_SVC_XTFWPORT
 ps aux | grep -i kubectl | grep -v grep | grep -e "port-forward service/mtllb-int-nginx --address 0.0.0.0 -n mtllb-int-test $TEST_SVC_XTFWPORT:$TEST_SVC_LBPORT --context kind-kind-pg-0" | awk {'print $2'} | xargs kill
 ```
 
-## Install `Node Exporter` on `KinD` Cluster
+## [WIP] Install `Node Exporter` on `KinD` Cluster
 ```bash
 helm repo add bitnami/redis https://pulsar.apache.org/charts && helm repo update
 
@@ -461,40 +490,19 @@ ps aux | grep -i kubectl | grep -v grep | grep -e "port-forward service/pulsar-m
 
 ## *Off-Cluster* `Incident Management #Board` Setup & Configuration
 
+## Setup `Static File Server` on the build host to stage NiFi Archives to be used in `Pulsar Runtime`
+```bash
+docker pull halverneus/static-file-server:v1.8.6
+mkdir -p /home/admin/shared/DockerVolumes/SFS-0
+docker run -d \
+    --name sfs-0 \
+    -v /home/admin/shared/DockerVolumes/SFS-0:/web \
+    -p 18881:8080 \
+    halverneus/static-file-server:v1.8.6
+```
+
 ## Teardown
 ```bash
 # Clean-up
 kind delete cluster --name kind-pg-0
 ```
-
-# Plan for Future Work
-- Orchestrate compute onboarding on Cloud Service Provider Compute Pool with Terraform
-- Orchestrate Platform setup with Ansible
-- Generate VM cloud-image for `Preparation` steps-completed state conforming to cloud-init *best-practices*
-- Incorporate Docker Engine installation steps into the document and into execution steps
-- Spin-up multiple clusters to separate compute(Pulsar Runtime) and persistence services (Redis) workloads
-- Manage end-to-end execution of the scenario:
-
-    - Setup CI/CD environment and stage project 
-    - Push initial commit
-    - Push pipeline descriptor
-    - Push revision and initiate pipeline setup
-    - Revise pipeline setup script for hourly setup & teardown of platform for re-usability
-    - Incorporate unit and integration tests into source-code
-    - Add stages for platform sanity checks for the generated setup
-
-- Optimizations:
-
-    - Incorporate image caching into KinD cluster descriptor (See Verrazzano setup with KinD)
-    - Incorporate private container image registry for infrastructure and platform setups
-    - Automate pushing container images to be used within the orchestrated deployments to the KinD nodes
-
-- Enhancements:
-    
-    - Incorporate multi-protocol configuration into MetalLB descriptor
-
-- Nice-to-have:
-    
-    - Migrate out monitoring infrastructure components from compute runtime clusters to off-cluster setup
-    - Incorporate overlay networking to setup multiple VM infrastructure for KinD
-    - Consolidate off-cluster monitoring components into a dedicated KinD cluster
