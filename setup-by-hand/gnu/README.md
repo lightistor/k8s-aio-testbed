@@ -15,13 +15,14 @@ mkdir -p /home/admin/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/conf
 mkdir -p /home/admin/app/cicd/challenges/KinD/deploy/xperiment/kind-k8s/gnu/platform-test-app
 mkdir -p /home/admin/app/helm-local
 mkdir -p /home/admin/stage/pulsar-runtime
+mkdir -p /home/admin/bin-temp
 ```
 
 ### **kubectl CLI Tool Installation on Cluster VM**
 ```bash
 mkdir -p /home/admin/util/kubectl/v1.23.0/bin
-curl -Lo kubectl-linux-amd64 https://dl.k8s.io/release/v1.23.0/bin/linux/amd64/kubectl
-mv kubectl-linux-amd64  /home/admin/util/kubectl/v1.23.0/bin/kubectl
+curl -Lo /home/admin/bin-temp/kubectl-linux-amd64 https://dl.k8s.io/release/v1.23.0/bin/linux/amd64/kubectl
+mv /home/admin/bin-temp/kubectl-linux-amd64  /home/admin/util/kubectl/v1.23.0/bin/kubectl
 chmod +x /home/admin/util/kubectl/v1.23.0/bin/kubectl
 sh -c 'cat << EOF >> /home/admin/.bashrc
 K8SCTL_HOME=/home/admin/util/kubectl/v1.23.0
@@ -33,8 +34,8 @@ source /home/admin/.bashrc
 ### **KinD CLI Tool Installation**
 ```bash
 mkdir -p /home/admin/util/kind/v0.12.0/bin
-curl -Lo /home/admin/kind-linux-amd64 https://github.com/kubernetes-sigs/kind/releases/download/v0.12.0/kind-linux-amd64
-mv /home/admin/kind-linux-amd64 /home/admin/util/kind/v0.12.0/bin/kind
+curl -Lo /home/admin/bin-temp/kind-linux-amd64 https://github.com/kubernetes-sigs/kind/releases/download/v0.12.0/kind-linux-amd64
+mv /home/admin/bin-temp/kind-linux-amd64 /home/admin/util/kind/v0.12.0/bin/kind
 chmod +x /home/admin/util/kind/v0.12.0/bin/kind
 sh -c 'cat << EOF >> /home/admin/.bashrc
 KIND_HOME=/home/admin/util/kind/v0.12.0
@@ -47,8 +48,8 @@ docker pull kindest/node:v1.23.4
 ### **Helm CLI Tool Installation**
 ```bash
 mkdir -p /home/admin/util/helm/v3.4.1/bin
-curl -Lo /home/admin/helm-v3.4.1-linux-amd64.tar.gz https://get.helm.sh/helm-v3.4.1-linux-amd64.tar.gz
-tar -xf /home/admin/helm-v3.4.1-linux-amd64.tar.gz -C /home/admin/util/helm/v3.4.1
+curl -Lo /home/admin/bin-temp/helm-v3.4.1-linux-amd64.tar.gz https://get.helm.sh/helm-v3.4.1-linux-amd64.tar.gz
+tar -xf /home/admin/bin-temp/helm-v3.4.1-linux-amd64.tar.gz -C /home/admin/util/helm/v3.4.1
 mv /home/admin/util/helm/v3.4.1/linux-amd64/helm /home/admin/util/helm/v3.4.1/bin/helm
 chmod +x /home/admin/util/helm/v3.4.1/bin/helm
 rm /home/admin/helm-v3.4.1-linux-amd64.tar.gz
@@ -63,9 +64,9 @@ source /home/admin/.bashrc
 ### **Pulsar CLI Installation**
 ```bash
 mkdir -p /home/admin/util/pulsar/v2.9.1
-curl -Lo /home/admin/apache-pulsar-v2.9.1-bin.tar.gz https://archive.apache.org/dist/pulsar/pulsar-2.9.1/apache-pulsar-2.9.1-bin.tar.gz
+curl -Lo /home/admin/bin-temp/apache-pulsar-v2.9.1-bin.tar.gz https://archive.apache.org/dist/pulsar/pulsar-2.9.1/apache-pulsar-2.9.1-bin.tar.gz
 
-tar -xf /home/admin/apache-pulsar-v2.9.1-bin.tar.gz -C /home/admin/util/pulsar/v2.9.1
+tar -xf /home/admin/bin-temp/apache-pulsar-v2.9.1-bin.tar.gz -C /home/admin/util/pulsar/v2.9.1
 mv /home/admin/util/pulsar/v2.9.1/apache-pulsar-2.9.1/* /home/admin/util/pulsar/v2.9.1/
 rm -rf /home/admin/util/pulsar/v2.9.1/apache-pulsar-2.9.1
 sh -c 'cat << EOF >> /home/admin/.bashrc
@@ -75,15 +76,27 @@ EOF'
 source /home/admin/.bashrc
 ```
 
+### (Required-for-DevGitOps) **ArgoCD CLI Installation**
+```bash
+mkdir -p /home/admin/util/argocd/v2.4.3/bin
+curl -Lo /home/admin/bin-temp/argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/download/v2.4.3/argocd-linux-amd64
+mv /home/admin/bin-temp/argocd-linux-amd64  /home/admin/util/argocd/v2.4.3/bin/argocd
+chmod +x /home/admin/util/argocd/v2.4.3/bin/argocd
+sh -c 'cat << EOF >> /home/admin/.bashrc
+ARGOCDCLI_HOME=/home/admin/util/argocd/v2.4.3
+PATH=\$ARGOCDCLI_HOME/bin:\$PATH
+EOF'
+```
+
 ### **JDK Installlation for Java 11**
 ```bash
 # Java 1.8
 # sudo dnf install java-1.8.0-openjdk
 # sudo dnf install java-11-openjdk
 mkdir -p /home/admin/util/openjdk/11/1.11.28
-curl -Lo /home/admin/openjdk-11+28_linux-x64_bin.tar.gz https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_linux-x64_bin.tar.gz
+curl -Lo /home/admin/bin-temp/openjdk-11+28_linux-x64_bin.tar.gz https://download.java.net/openjdk/jdk11/ri/openjdk-11+28_linux-x64_bin.tar.gz
 
-tar -xf /home/admin/openjdk-11+28_linux-x64_bin.tar.gz -C /home/admin/util/openjdk/11/1.11.28
+tar -xf /home/admin/bin-temp/openjdk-11+28_linux-x64_bin.tar.gz -C /home/admin/util/openjdk/11/1.11.28
 mv /home/admin/util/openjdk/11/1.11.28/jdk-11/* /home/admin/util/openjdk/11/1.11.28/
 rm -rf /home/admin/util/openjdk/11/1.11.28/jdk-11
 sh -c 'cat << EOF >> /home/admin/.bashrc
@@ -96,9 +109,9 @@ source /home/admin/.bashrc
 ### **Maven Installation**
 ```bash
 mkdir -p /home/admin/util/maven/3.8.5
-curl -Lo /home/admin/apache-maven-3.8.5-bin.tar.gz https://dlcdn.apache.org/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.tar.gz
+curl -Lo /home/admin/bin-temp/apache-maven-3.8.5-bin.tar.gz https://dlcdn.apache.org/maven/maven-3/3.8.5/binaries/apache-maven-3.8.5-bin.tar.gz
 
-tar -xf /home/admin/apache-maven-3.8.5-bin.tar.gz -C /home/admin/util/maven/3.8.5
+tar -xf /home/admin/bin-temp/apache-maven-3.8.5-bin.tar.gz -C /home/admin/util/maven/3.8.5
 mv /home/admin/util/maven/3.8.5/apache-maven-3.8.5/* /home/admin/util/maven/3.8.5/
 rm -rf /home/admin/util/maven/3.8.5/apache-maven-3.8.5
 sh -c 'cat << EOF >> /home/admin/.bashrc
