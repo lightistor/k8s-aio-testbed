@@ -289,6 +289,12 @@ kubectl get service --all-namespaces --context kind-kind-pg-0
 ```
 
 ## Setup MetalLB
+### Pre-Requisite
+```bash
+sysctl -w fs.inotify.max_user_watches=512000
+sysctl -w fs.inotify.max_user_instances=512000
+```
+
 ```bash
 # Apply MetalLB Manifest
 kubectl create ns metallb-system --context kind-kind-pg-0
